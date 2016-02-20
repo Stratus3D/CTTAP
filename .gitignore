@@ -1,0 +1,12 @@
+*.o
+*.beam
+*.plt
+erl_crash.dump
+.eunit
+
+# Ignore directories containing deps, beam files, logs and compiled docs
+deps/
+ebin/
+log/
+logs/
+doc/

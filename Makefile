@@ -1,10 +1,10 @@
-PROJECT = ctap
+PROJECT = cttap
 
 include erlang.mk
 
-example_ctap_test:
-	mkdir -p logs/example_ctap
-	make ct-ctap_usage CT_OPTS='-ct_hooks ctap "[{filename, \"test.tap\"}]" -logdir logs/example_ctap'
+example_cttap_test:
+	mkdir -p logs/example_cttap
+	make ct-cttap_usage CT_OPTS='-ct_hooks cttap "[{filename, \"test.tap\"}]" -logdir logs/example_cttap'
 
-ctap_tests: example_ctap_test
-	make ct-ctap
+cttap_tests: example_cttap_test
+	make ct-cttap

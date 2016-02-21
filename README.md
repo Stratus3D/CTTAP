@@ -1,21 +1,32 @@
-#CTAP
+#CTTAP
 *Common Test Test Anything Protocol*
 
+A TAP producer that integrates with Common Test via a Common Test Hook.
+
 ##Installation
-Add as a test dep.
-
-##Usage
-
-Add ctap as a ct_hook:
+Add CTTAP as a test dependency in your project:
 
 erlang.mk:
 
-    CT_OPTS = -ct_hooks ctap
+    TEST_DEPS = cttap
+    dep_cttap = git repo master
 
 Rebar:
 
-    {ct_extra_params, "-ct_hooks ctap"}
+    TODO: Add code for rebar dep
+
+##Usage
+
+Add cttap as a ct_hook:
+
+erlang.mk:
+
+    CT_OPTS = -ct_hooks cttap
+
+Rebar:
+
+    {ct_extra_params, "-ct_hooks cttap"}
 
 Rebar3:
 
-    {ct_opts, [ctap]}
+    {ct_opts, [cttap]}

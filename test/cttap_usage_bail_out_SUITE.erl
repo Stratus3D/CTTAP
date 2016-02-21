@@ -1,4 +1,4 @@
--module(ctap_usage_bail_out_SUITE).
+-module(cttap_usage_bail_out_SUITE).
 
 %% Common Test callbacks
 -export([all/0,

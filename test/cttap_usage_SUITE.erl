@@ -1,4 +1,4 @@
--module(ctap_usage_SUITE).
+-module(cttap_usage_SUITE).
 
 %% Common Test callbacks
 -export([all/0,

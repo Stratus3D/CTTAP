@@ -1,4 +1,4 @@
--module(ctap_SUITE).
+-module(cttap_SUITE).
 
 %% Common Test callbacks
 -export([all/0,
@@ -31,9 +31,9 @@ groups() ->
     [].
 
 init_per_suite(Config) ->
-    % Run the ctap_example test suite
-    %Result = os:cmd("make example_ctap_test"),
-    %Result = ct:run_test([{suite, [ctap_usage]}, {ct_hooks, [ctap]}, {logdir, "logs/example_ctap"}]),
+    % Run the cttap_example test suite
+    %Result = os:cmd("make example_cttap_test"),
+    %Result = ct:run_test([{suite, [cttap_usage]}, {ct_hooks, [cttap]}, {logdir, "logs/example_cttap"}]),
     %ct:pal("Result: ~w", [Result]),
     Config.
 
@@ -60,6 +60,6 @@ end_per_testcase(_TestCase, _Config) ->
 %%%===================================================================
 
 my_test_case(_Config) ->
-    %Result = ct:run_test([{suite, [ctap_usage]}, {ct_hooks, [{ctap, [{filename, "test.tap"}]}]}, {logdir, "logs/example_ctap"}]),
+    %Result = ct:run_test([{suite, [cttap_usage]}, {ct_hooks, [{cttap, [{filename, "test.tap"}]}]}, {logdir, "logs/example_cttap"}]),
     %ct:pal("Result: ~w", [Result]),
     ok.

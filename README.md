@@ -9,11 +9,14 @@ Add CTTAP as a test dependency in your project:
 erlang.mk:
 
     TEST_DEPS = cttap
-    dep_cttap = git repo master
+    dep_cttap = git https://github.com/Stratus3D/cttap.git master
 
-Rebar:
+Rebar and Rebar3:
 
-    TODO: Add code for rebar dep
+    {deps, [app_name,
+        {rebar, ".*",
+         {git, "git://github.com/Stratus3D/cttap.git", {branch, "master"}}}
+    }
 
 ##Usage
 

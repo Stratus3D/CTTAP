@@ -1,0 +1,6 @@
+{application, cttap,
+  [{vsn, "0.1.0"},
+  {modules, [cttap]},
+  {registered, []},
+  {mod, {cttap, []}}
+  ]}.

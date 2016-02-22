@@ -125,9 +125,6 @@ terminate(State) ->
     lists:foreach(fun(Line) ->
                           io:format(State#state.file_handle, "~s~n", [Line])
                   end, TapOutput),
-    io:format(State#state.file_handle, "~p.~n",
-               [{test_run, State#state.total, State#state.data}]),
-    io:format(State#state.file_handle, "State debug: ~p.~n", [State]),
     file:close(State#state.file_handle),
     ok.
 
@@ -136,11 +133,31 @@ terminate(State) ->
 %%%===================================================================
 
 tapify(Data) ->
-    Output = [
-             version(),
-             test_plan_line(length(Data))
-             ],
-    Output.
+    {Output, Count} = process_suites(Data, 0, []),
+    [version(), test_plan_line(Count) |lists:reverse(Output)].
+
+process_suites([], Count, Output) ->
+    {Output, Count};
+process_suites([{suites, Suite, _Num, TestCases}|Suites], Count, Output) ->
+    Header = diagnostic_line(["Starting ", atom_to_list(Suite)]),
+    Footer = diagnostic_line(["Completed ", atom_to_list(Suite)]),
+    {TestcaseOutput, NewCount} = process_testcases(TestCases, Count, [Header|Output]),
+    process_suites(Suites, NewCount, [Footer|TestcaseOutput]).
+
+process_testcases([], Count, Output) ->
+    {Output, Count};
+process_testcases([{testcase, Name, Return, _Num}|TestCases], Count, Output) ->
+    Line = case Return of
+        {skip, todo} ->
+            test_todo(Count, Name, "");
+        {skip, Reason} ->
+            test_skip(Count, Name, Reason);
+        {error, Reason} ->
+            test_fail(Count, [atom_to_list(Name), " Reason: ", io_lib:format("~w", [Reason])]);
+        Value ->
+            test_success(Count, [atom_to_list(Name), " Return value: ", io_lib:format("~w", [Value])])
+    end,
+    process_testcases(TestCases, Count + 1, [Line|Output]).
 
 timestamp() ->
     os:timestamp().
@@ -175,10 +192,8 @@ test_skip(Number, Description, Reason) ->
 test_todo(Number, Description, Reason) ->
     io_lib:format("not ok ~B ~s # TODO ~s", [Number, Description, Reason]).
 
-diagnostic_line(Message) when is_list(Message) ->
-    diagnostic_line(list_to_binary(Message));
-diagnostic_line(Message) when is_binary(Message) ->
-    io_lib:format("# ~s", [Message]).
+diagnostic_line(Message) ->
+    ["# "|Message].
 
 diagnostic_multiline(Message) when is_list(Message) ->
     diagnostic_multiline(list_to_binary(Message));

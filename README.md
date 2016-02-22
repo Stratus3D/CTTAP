@@ -24,11 +24,11 @@ Add cttap as a ct_hook:
 
 erlang.mk:
 
-    CT_OPTS = -ct_hooks cttap
+    CT_OPTS ='-ct_hooks cttap "[{filename, \"../test.tap\"}]"'
 
 Rebar:
 
-    {ct_extra_params, "-ct_hooks cttap"}
+    {ct_extra_params, "-ct_hooks cttap '[{filename, \"../test.tap\"}]'"}
 
 Rebar3:
 

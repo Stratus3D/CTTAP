@@ -1,7 +1,7 @@
 #CTTAP
 *Common Test Test Anything Protocol*
 
-A TAP producer that integrates with Common Test via a Common Test Hook.
+A TAP producer that integrates with existing Common Test suites via a Common Test hook. CTTAP provides a simple way to generate TAP output without having to modify existing test code.
 
 ##Installation
 Add CTTAP as a test dependency in your project:

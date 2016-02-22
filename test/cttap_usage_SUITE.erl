@@ -41,18 +41,23 @@ all() ->
      todo_test,
      skip_test,
      diagnostic_test,
-     passing_test_in_group,
-     failing_test_in_group,
-     test_description_in_group,
-     todo_test_in_group,
-     skip_test_in_group
+     {group, passing},
+     {group, failing},
+     {group, description},
+     {group, todo},
+     {group, skip}
     ].
 
 suite() ->
     [{timetrap, {seconds, 30}}].
 
 groups() ->
-    [].
+    [{passing, [], [passing_test_in_group]},
+     {failing, [], [failing_test_in_group]},
+     {description, [], [test_description_in_group]},
+     {todo, [], [todo_test_in_group]},
+     {skip, [], [skip_test_in_group]}
+    ].
 
 init_per_suite(Config) ->
     Config.
@@ -63,6 +68,8 @@ end_per_suite(_Config) ->
 group(_GroupName) ->
     [].
 
+init_per_group(skip, _Config) ->
+    {skip, "it's part of the test"};
 init_per_group(_GroupName, Config) ->
     Config.
 
@@ -80,29 +87,24 @@ end_per_testcase(_TestCase, _Config) ->
 %%%===================================================================
 
 passing_test(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
-    ok.
+    % Passing test
+    passed.
 
 failing_test(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
-    ok.
+    % Failing test (badmatch)
+    1 = 2.
 
 test_description(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
+    % Description should just be the test function name
     ok.
 
 todo_test(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
-    ok.
+    % todo test
+    {skip, todo}.
 
 skip_test(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
-    ok.
+    % Skip this test
+    {skip, "I'm lazy"}.
 
 diagnostic_test(_Config) ->
     % TODO: Complete test
@@ -110,26 +112,21 @@ diagnostic_test(_Config) ->
     ok.
 
 passing_test_in_group(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
-    ok.
+    % Passing test in group
+    passed.
 
 failing_test_in_group(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
-    ok.
+    % Failing test in group (badmatch)
+    1 = 2.
 
 test_description_in_group(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
+    % Description should just be the test function name and group name
     ok.
 
 todo_test_in_group(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
-    ok.
+    % todo test in todo group
+    {skip, todo}.
 
 skip_test_in_group(_Config) ->
-    % TODO: Complete test
-    % Remember to remove `ok` when complete
-    ok.
+    % This test should be skipped since it's in the skip group
+    this_test_should_be_skipped.

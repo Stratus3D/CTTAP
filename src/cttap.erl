@@ -55,7 +55,7 @@ id(Opts) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-init(Id, Opts) ->
+init(Id, _Opts) ->
     ct:pal("Id: ~w", [Id]),
     {ok,TapFile} = file:open(Id,[write]),
     {ok, #state{file_handle = TapFile, total = 0, data = []}}.
@@ -66,46 +66,46 @@ init(Id, Opts) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-pre_init_per_suite(Suite,Config,State) ->
+pre_init_per_suite(_Suite,Config,State) ->
     {Config, State#state{ suite_total = 0, tcs = [] }}.
 
 %% @doc Called after init_per_suite.
-post_init_per_suite(Suite,Config,Return,State) ->
+post_init_per_suite(_Suite,_Config,Return,State) ->
     {Return, State}.
 
 %% @doc Called before end_per_suite. 
-pre_end_per_suite(Suite,Config,State) ->
+pre_end_per_suite(_Suite,Config,State) ->
     {Config, State}.
 
 %% @doc Called after end_per_suite. 
-post_end_per_suite(Suite,Config,Return,State) ->
+post_end_per_suite(Suite,_Config,Return,State) ->
     Data = {suites, Suite, State#state.suite_total, lists:reverse(State#state.tcs)},
     {Return, State#state{ data = [Data | State#state.data] ,
                           total = State#state.total + State#state.suite_total } }.
 
 %% @doc Called before each init_per_group.
-pre_init_per_group(Group,Config,State) ->
+pre_init_per_group(_Group,Config,State) ->
     {Config, State}.
 
 %% @doc Called after each init_per_group.
-post_init_per_group(Group,Config,Return,State) ->
+post_init_per_group(_Group,_Config,Return,State) ->
     {Return, State}.
 
 %% @doc Called after each end_per_group. 
-pre_end_per_group(Group,Config,State) ->
+pre_end_per_group(_Group,Config,State) ->
     {Config, State}.
 
 %% @doc Called after each end_per_group. 
-post_end_per_group(Group,Config,Return,State) ->
+post_end_per_group(_Group,_Config,Return,State) ->
     {Return, State}.
 
 %% @doc Called before each test case.
-pre_init_per_testcase(TC,Config,State) ->
-    {Config, State#state{ ts = now(), total = State#state.suite_total + 1 } }.
+pre_init_per_testcase(_TC,Config,State) ->
+    {Config, State#state{ ts = timestamp(), total = State#state.suite_total + 1 } }.
 
 %% @doc Called after each test case.
 post_end_per_testcase(TC,_Config,Return,State) ->
-    TCInfo = {testcase, TC, Return, timer:now_diff(now(), State#state.ts)},
+    TCInfo = {testcase, TC, Return, timer:now_diff(timestamp(), State#state.ts)},
     {Return, State#state{ ts = undefined, tcs = [TCInfo | State#state.tcs] } }.
 
 %% @doc Called after post_init_per_suite, post_end_per_suite, post_init_per_group,
@@ -141,6 +141,9 @@ tapify(Data) ->
              test_plan_line(length(Data))
              ],
     Output.
+
+timestamp() ->
+    os:timestamp().
 
 %%%===================================================================
 %%% Test Anything Protocol functions

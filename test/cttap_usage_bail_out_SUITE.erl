@@ -34,8 +34,8 @@ suite() ->
 groups() ->
     [].
 
-init_per_suite(Config) ->
-    Config.
+init_per_suite(_Config) ->
+    {skip, <<"test bail out">>}.
 
 end_per_suite(_Config) ->
     ok.

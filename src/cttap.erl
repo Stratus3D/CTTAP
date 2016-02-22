@@ -171,3 +171,14 @@ test_skip(Number, Description, Reason) ->
 
 test_todo(Number, Description, Reason) ->
     io_lib:format("not ok ~B ~s # TODO ~s", [Number, Description, Reason]).
+
+diagnostic_line(Message) when is_list(Message) ->
+    diagnostic_line(list_to_binary(Message));
+diagnostic_line(Message) when is_binary(Message) ->
+    io_lib:format("# ~s", [Message]).
+
+diagnostic_multiline(Message) when is_list(Message) ->
+    diagnostic_multiline(list_to_binary(Message));
+diagnostic_multiline(Message) when is_binary(Message) ->
+    Lines = binary:split(Message, <<"~n">>, [global]),
+    [diagnostic_line(Line) || Line <- Lines].

@@ -34,12 +34,12 @@ Rebar3:
 
     {ct_opts, [cttap]}
 
-# Similar Projects
+##Similar Projects
 
 * [https://github.com/ngerakines/etap](https://github.com/ngerakines/etap)
 
-## Known Issues
+##Known Issues
 No known issues.
 
-## Contributing
+##Contributing
 Feel free to create an issue or pull request on GitHub ([https://github.com/Stratus3D/cttap/issues](https://github.com/Stratus3D/cttap/issues)) if you find a bug or see something that could be improved.

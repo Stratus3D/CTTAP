@@ -1,6 +1,13 @@
-{application, cttap,
-  [{vsn, "0.1.0"},
-  {modules, [cttap]},
-  {registered, []},
-  {mod, {cttap, []}}
-  ]}.
+{application, cttap, [
+	{description, "A TAP producer that integrates with existing Common Test suites via a Common Test hook."},
+	{vsn, "0.1.0"},
+	{id, "git"},
+	{modules, []},
+	{registered, []},
+	{applications, [
+		kernel,
+		stdlib
+	]},
+	{mod, {cttap_app, []}},
+	{env, []}
+]}.

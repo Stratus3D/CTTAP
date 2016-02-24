@@ -28,7 +28,7 @@
 
 -export([terminate/1]).
 
--record(state, { file_handle, total, suite_total, ts, tcs, data }).
+-record(state, { file_handle, total, suite_total, ts, tg, tcs, tgtcs, data }).
 
 -define(default_tap_file, "tap_output").
 
@@ -88,8 +88,9 @@ pre_init_per_group(_Group,Config,State) ->
     {Config, State}.
 
 %% @doc Called after each init_per_group.
-post_init_per_group(_Group,_Config,Return,State) ->
-    {Return, State}.
+post_init_per_group(Group,_Config,Return,State) ->
+    Data = {group, Group, Return, [], incomplete},
+    {Return, State#state{tg=Data, tgtcs=[]}}.
 
 %% @doc Called after each end_per_group. 
 pre_end_per_group(_Group,Config,State) ->
@@ -97,7 +98,10 @@ pre_end_per_group(_Group,Config,State) ->
 
 %% @doc Called after each end_per_group. 
 post_end_per_group(_Group,_Config,Return,State) ->
-    {Return, State}.
+    {group, GroupName, _, _, _}=State#state.tg,
+    OtherTests=State#state.tcs,
+    NewGroupData={group, GroupName, Return, lists:reverse(State#state.tgtcs)},
+    {Return, State#state{tg=undefined, tcs=[NewGroupData|OtherTests], tgtcs=undefined}}.
 
 %% @doc Called before each test case.
 pre_init_per_testcase(_TC,Config,State) ->
@@ -106,7 +110,14 @@ pre_init_per_testcase(_TC,Config,State) ->
 %% @doc Called after each test case.
 post_end_per_testcase(TC,_Config,Return,State) ->
     TCInfo = {testcase, TC, Return, timer:now_diff(timestamp(), State#state.ts)},
-    {Return, State#state{ ts = undefined, tcs = [TCInfo | State#state.tcs] } }.
+    NewState = case State#state.tg of
+        {group, _, _, _, incomplete} ->
+            State#state{ ts = undefined, tgtcs = [TCInfo | State#state.tgtcs] };
+        _ ->
+            State#state{ ts = undefined, tcs = [TCInfo | State#state.tcs] }
+    end,
+
+    {Return, NewState}.
 
 %% @doc Called after post_init_per_suite, post_end_per_suite, post_init_per_group,
 %% post_end_per_group and post_end_per_testcase if the suite, group or test case failed.
@@ -118,9 +129,14 @@ on_tc_fail(_TC, _Reason, State) ->
 on_tc_skip(_TC, _Reason, State) ->
     State.
 
-%% @doc Called when the scope of the CTH is done
+%%--------------------------------------------------------------------
+%% @doc
+%% Called when the scope of the CTH is done
+%%
+%% @end
+%%--------------------------------------------------------------------
 terminate(State) ->
-    TapOutput = tapify(State#state.data),
+    TapOutput = tapify(State#state.data, State#state.suite_total),
     %io:format(State#state.file_handle, "~s~n", [TapOutput]),
     lists:foreach(fun(Line) ->
                           io:format(State#state.file_handle, "~s~n", [Line])
@@ -132,9 +148,9 @@ terminate(State) ->
 %%% Internal functions
 %%%===================================================================
 
-tapify(Data) ->
+tapify(Data, Total) ->
     {Output, Count} = process_suites(Data, 0, []),
-    [version(), test_plan_line(Count) |lists:reverse(Output)].
+    [version(), test_plan_line(Total) |lists:reverse(Output)].
 
 process_suites([], Count, Output) ->
     {Output, Count};
@@ -146,6 +162,11 @@ process_suites([{suites, Suite, _Num, TestCases}|Suites], Count, Output) ->
 
 process_testcases([], Count, Output) ->
     {Output, Count};
+process_testcases([{group, Name, Return, GroupTestCases}|TestCases], Count, Output) ->
+    Header = diagnostic_line(["Starting ", atom_to_list(Name), " group"]),
+    Footer = diagnostic_line(["Completed ", atom_to_list(Name), " group Return value: ", io_lib:format("~w", [Return])]),
+    {NewOutput, NewCount} = process_testcases(GroupTestCases, Count, [Header|Output]),
+    process_testcases(TestCases, NewCount, [Footer|NewOutput]);
 process_testcases([{testcase, Name, Return, _Num}|TestCases], Count, Output) ->
     Line = case Return of
         {skip, todo} ->
@@ -195,8 +216,9 @@ test_todo(Number, Description, Reason) ->
 diagnostic_line(Message) ->
     ["# "|Message].
 
-diagnostic_multiline(Message) when is_list(Message) ->
-    diagnostic_multiline(list_to_binary(Message));
-diagnostic_multiline(Message) when is_binary(Message) ->
-    Lines = binary:split(Message, <<"~n">>, [global]),
-    [diagnostic_line(Line) || Line <- Lines].
+% We currently don't need this function
+%diagnostic_multiline(Message) when is_list(Message) ->
+%    diagnostic_multiline(list_to_binary(Message));
+%diagnostic_multiline(Message) when is_binary(Message) ->
+%    Lines = binary:split(Message, <<"~n">>, [global]),
+%    [diagnostic_line(Line) || Line <- Lines].

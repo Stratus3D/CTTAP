@@ -24,7 +24,10 @@
          failing_test_in_group/1,
          test_description_in_group/1,
          todo_test_in_group/1,
-         skip_test_in_group/1
+         skip_test_in_group/1,
+         group_order_1/1,
+         group_order_2/1,
+         group_order_3/1
          ]).
 
 -include_lib("common_test/include/ct.hrl").
@@ -45,7 +48,8 @@ all() ->
      {group, failing},
      {group, description},
      {group, todo},
-     {group, skip}
+     {group, skip},
+     {group, order}
     ].
 
 suite() ->
@@ -56,7 +60,12 @@ groups() ->
      {failing, [], [failing_test_in_group]},
      {description, [], [test_description_in_group]},
      {todo, [], [todo_test_in_group]},
-     {skip, [], [skip_test_in_group]}
+     {skip, [], [skip_test_in_group]},
+     {order, [], [
+                group_order_1,
+                group_order_2,
+                group_order_3
+                ]}
     ].
 
 init_per_suite(Config) ->
@@ -130,3 +139,15 @@ todo_test_in_group(_Config) ->
 skip_test_in_group(_Config) ->
     % This test should be skipped since it's in the skip group
     this_test_should_be_skipped.
+
+group_order_1(_Config) ->
+    % Passing test
+    passed.
+
+group_order_2(_Config) ->
+    % Failing test (badmatch)
+    1 = 2.
+
+group_order_3(_Config) ->
+    % Passing test
+    ok.

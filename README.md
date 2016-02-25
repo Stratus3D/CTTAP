@@ -36,7 +36,8 @@ Rebar3:
 
 ##Similar Projects
 
-* [https://github.com/ngerakines/etap](https://github.com/ngerakines/etap)
+* An complete testing library with TAP output: [https://github.com/ngerakines/etap](https://github.com/ngerakines/etap)
+* A TAP producer for Elixir's ExUnit: [https://github.com/Stratus3D/Spout](https://github.com/Stratus3D/Spout)
 
 ##Known Issues
 No known issues.

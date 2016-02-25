@@ -149,7 +149,7 @@ terminate(State) ->
 %%%===================================================================
 
 tapify(Data, Total) ->
-    {Output, Count} = process_suites(Data, 0, []),
+    {Output, _Count} = process_suites(Data, 0, []),
     [version(), test_plan_line(Total) |lists:reverse(Output)].
 
 process_suites([], Count, Output) ->
@@ -168,6 +168,7 @@ process_testcases([{group, Name, Return, GroupTestCases}|TestCases], Count, Outp
     {NewOutput, NewCount} = process_testcases(GroupTestCases, Count, [Header|Output]),
     process_testcases(TestCases, NewCount, [Footer|NewOutput]);
 process_testcases([{testcase, Name, Return, _Num}|TestCases], Count, Output) ->
+    % TODO: Figure out how to access the IO log here and log IO as diagnostic output
     Line = case Return of
         {skip, todo} ->
             test_todo(Count, Name, "");

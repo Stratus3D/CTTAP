@@ -105,7 +105,7 @@ post_end_per_group(_Group,_Config,Return,State) ->
 
 %% @doc Called before each test case.
 pre_init_per_testcase(_TC,Config,State) ->
-    {Config, State#state{ ts = timestamp(), total = State#state.suite_total + 1 } }.
+    {Config, State#state{ ts = timestamp(), suite_total = State#state.suite_total + 1 } }.
 
 %% @doc Called after each test case.
 post_end_per_testcase(TC,_Config,Return,State) ->
@@ -136,8 +136,7 @@ on_tc_skip(_TC, _Reason, State) ->
 %% @end
 %%--------------------------------------------------------------------
 terminate(State) ->
-    TapOutput = tapify(State#state.data, State#state.suite_total),
-    %io:format(State#state.file_handle, "~s~n", [TapOutput]),
+    TapOutput = tapify(State#state.data, State#state.total),
     lists:foreach(fun(Line) ->
                           io:format(State#state.file_handle, "~s~n", [Line])
                   end, TapOutput),

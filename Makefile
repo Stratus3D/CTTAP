@@ -5,7 +5,7 @@ PROJECT = cttap
 include erlang.mk
 
 EXAMPLE_CT_SUITES ?= $(sort $(subst _SUITE.erl,,$(shell find example_tests -type f -name \*_SUITE.erl -exec basename {} \;)))
-EXAMPLE_CT_OPTS='-ct_hooks cttap "[{filename, \"../test.tap\"}]" -logdir logs/example_cttap'
+EXAMPLE_CT_OPTS= -ct_hooks cttap "[{filename, \"../test.tap\"}]" -logdir logs/example_cttap
 
 build-example-ct-suites: build-ct-deps
 	$(gen_verbose) erlc -v $(TEST_ERLC_OPTS) -I include/ -o example_tests/ \

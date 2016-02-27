@@ -148,7 +148,7 @@ terminate(State) ->
 %%%===================================================================
 
 tapify(Data, Total) ->
-    {Output, _Count} = process_suites(Data, 0, []),
+    {Output, _Count} = process_suites(Data, 1, []),
     [version(), test_plan_line(Total) |lists:reverse(Output)].
 
 process_suites([], Count, Output) ->

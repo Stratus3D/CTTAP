@@ -163,7 +163,7 @@ process_testcases([], Count, Output) ->
     {Output, Count};
 process_testcases([{group, Name, Return, GroupTestCases}|TestCases], Count, Output) ->
     Header = diagnostic_line(["Starting ", atom_to_list(Name), " group"]),
-    Footer = diagnostic_line(["Completed ", atom_to_list(Name), " group Return value: ", io_lib:format("~w", [Return])]),
+    Footer = diagnostic_line(["Completed ", atom_to_list(Name), " group. Return value: ", io_lib:format("~w", [Return])]),
     {NewOutput, NewCount} = process_testcases(GroupTestCases, Count, [Header|Output]),
     process_testcases(TestCases, NewCount, [Footer|NewOutput]);
 process_testcases([{testcase, Name, Return, _Num}|TestCases], Count, Output) ->
@@ -174,7 +174,7 @@ process_testcases([{testcase, Name, Return, _Num}|TestCases], Count, Output) ->
         {skip, Reason} ->
             test_skip(Count, Name, Reason);
         {error, Reason} ->
-            test_fail(Count, [atom_to_list(Name), " Reason: ", io_lib:format("~w", [Reason])]);
+            test_fail(Count, [atom_to_list(Name), ". Reason: ", io_lib:format("~w", [Reason])]);
         Value ->
             test_success(Count, [atom_to_list(Name), " Return value: ", io_lib:format("~w", [Value])])
     end,

@@ -13,7 +13,7 @@
          end_per_testcase/2]).
 
 %% Test cases
--export([my_test_case/1]).
+-export([validate_output/1]).
 
 -include_lib("common_test/include/ct.hrl").
 
@@ -22,7 +22,7 @@
 %%%===================================================================
 
 all() ->
-    [my_test_case].
+    [validate_output].
 
 suite() ->
     [{timetrap, {seconds, 30}}].
@@ -31,11 +31,9 @@ groups() ->
     [].
 
 init_per_suite(Config) ->
-    % Run the cttap_example test suite
-    %Result = os:cmd("make example_cttap_test"),
-    %Result = ct:run_test([{suite, [cttap_usage]}, {ct_hooks, [cttap]}, {logdir, "logs/example_cttap"}]),
-    %ct:pal("Result: ~w", [Result]),
-    Config.
+    {ok,TapOutput} = file:read_file("../example_cttap/test.tap"),
+    ct:pal("TapOutput: ~s", [TapOutput]),
+    [{tap_output, TapOutput}|Config].
 
 end_per_suite(_Config) ->
     ok.
@@ -59,7 +57,37 @@ end_per_testcase(_TestCase, _Config) ->
 %%% Test cases
 %%%===================================================================
 
-my_test_case(_Config) ->
-    %Result = ct:run_test([{suite, [cttap_usage]}, {ct_hooks, [{cttap, [{filename, "test.tap"}]}]}, {logdir, "logs/example_cttap"}]),
-    %ct:pal("Result: ~w", [Result]),
+validate_output(Config) ->
+    TapOutput = ?config(tap_output, Config),
+    Lines = binary:split(TapOutput, <<"\n">>, [global]),
+    [Version, TestPlan|Tests] = Lines,
+
+    % First line should be the version
+    <<"TAP version 13">> = Version,
+
+    % Second line should be the test plan (skipped suite is excluded the report)
+    <<"1..16">> = TestPlan,
+
+    % Next comes the passing suite
+    [SuiteHeader, Passing1, Passing2, Passing3, SuiteFooter|UsageSuite] = Tests,
+
+    % Header and footer should include the suite name
+    <<"# Starting cttap_usage_passing_SUITE">> = SuiteHeader,
+    <<"# Completed cttap_usage_passing_SUITE">> = SuiteFooter,
+
+    % Passing tests
+    passing_test(Passing1, 1, passing_test_1, ok),
+    passing_test(Passing2, 2, passing_test_2, ok),
+    passing_test(Passing3, 3, passing_test_3, ok),
+
+    % Then the usage suite
+    [_UsageSuiteHeader, Passing1, Passing2, Passing3, _UsageSuiteFooter|_] = UsageSuite,
+    ct:pal("Tests: ~w", [length(Tests)]),
     ok.
+
+% Private functions
+passing_test(Line, Number, Test, Return) ->
+    TestName = atom_to_binary(Test, utf8),
+    NumberBin = integer_to_binary(Number),
+    Expected = <<"ok ", NumberBin/binary, " ", TestName/binary, " Return value: ", Return/binary>>,
+    Expected = Line.

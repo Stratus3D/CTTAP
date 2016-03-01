@@ -2,8 +2,6 @@ PROJECT = cttap
 
 .PHONY: example_tests
 
-include erlang.mk
-
 EXAMPLE_CT_SUITES ?= $(sort $(subst _SUITE.erl,,$(shell find example_tests -type f -name \*_SUITE.erl -exec basename {} \;)))
 EXAMPLE_CT_OPTS= -ct_hooks cttap "[{filename, \"../test.tap\"}]" -logdir logs/example_cttap
 
@@ -33,4 +31,6 @@ example_tests: clean deps app build-example-ct-suites
 	$(gen_verbose) rm -f test/*.beam
 
 # Example tests need be run before the regular tests so they TAP output is available
-cttap_tests: example_tests tests
+tests:: example_tests
+
+include erlang.mk

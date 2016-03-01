@@ -81,7 +81,8 @@ validate_output(Config) ->
     passing_test(Passing3, 3, passing_test_3, ok),
 
     % Then the usage suite
-    [_UsageSuiteHeader, Passing1, Passing2, Passing3, _UsageSuiteFooter|_] = UsageSuite,
+    [_UsageSuiteHeader, PassingOk, Failing, PassingDescription, Todo, Skip, Diagnostic|_] = UsageSuite,
+    % TODO: Complete unit test
     ct:pal("Tests: ~w", [length(Tests)]),
     ok.
 
@@ -89,5 +90,6 @@ validate_output(Config) ->
 passing_test(Line, Number, Test, Return) ->
     TestName = atom_to_binary(Test, utf8),
     NumberBin = integer_to_binary(Number),
-    Expected = <<"ok ", NumberBin/binary, " ", TestName/binary, " Return value: ", Return/binary>>,
+    ReturnBin = list_to_binary(io_lib:format("~w", [Return])),
+    Expected = <<"ok ", NumberBin/binary, " ", TestName/binary, " Return value: ", ReturnBin/binary>>,
     Expected = Line.

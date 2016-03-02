@@ -81,8 +81,17 @@ validate_output(Config) ->
     passing_test(Passing3, 3, passing_test_3, ok),
 
     % Then the usage suite
-    [_UsageSuiteHeader, PassingOk, Failing, PassingDescription, Todo, Skip, Diagnostic|_] = UsageSuite,
+    [UsageSuiteHeader, PassingOk, Failing, PassingDescription, Todo, Skip, Diagnostic|Groups] = UsageSuite,
+    passing_test(PassingOk, 4, passing_test, ok),
     % TODO: Complete unit test
+    %failing_test(Failing, 5, failing_test, io_lib:format(
+
+    [_|Remaining] = Groups,
+
+    % Header and footer include the suite name
+    <<"# Starting cttap_usage_SUITE">> = UsageSuiteHeader,
+    %<<"# Completed cttap_usage_SUITE">> = UsageSuiteFooter,
+
     ct:pal("Tests: ~w", [length(Tests)]),
     ok.
 
@@ -92,4 +101,11 @@ passing_test(Line, Number, Test, Return) ->
     NumberBin = integer_to_binary(Number),
     ReturnBin = list_to_binary(io_lib:format("~w", [Return])),
     Expected = <<"ok ", NumberBin/binary, " ", TestName/binary, " Return value: ", ReturnBin/binary>>,
+    Expected = Line.
+
+failing_test(Line, Number, Test, Reason) ->
+    TestName = atom_to_binary(Test, utf8),
+    NumberBin = integer_to_binary(Number),
+    ReasonBin = list_to_binary(io_lib:format("~w", [Reason])),
+    Expected = <<"not ok ", NumberBin/binary, " ", TestName/binary, " Reason: ", ReasonBin/binary>>,
     Expected = Line.

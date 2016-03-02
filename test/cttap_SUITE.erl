@@ -84,6 +84,9 @@ validate_output(Config) ->
     [UsageSuiteHeader, PassingOk, Failing, PassingDescription, Todo, Skip, Diagnostic|Groups] = UsageSuite,
     passing_test(PassingOk, 4, passing_test, ok),
     failing_test(Failing, 5, failing_test),
+    passing_test(PassingDescription, 6, test_description, ok),
+    %failing_test(Todo, 7, todo_test),
+
     % TODO: Complete unit test
 
     [_|Remaining] = Groups,

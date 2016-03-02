@@ -83,8 +83,8 @@ validate_output(Config) ->
     % Then the usage suite
     [UsageSuiteHeader, PassingOk, Failing, PassingDescription, Todo, Skip, Diagnostic|Groups] = UsageSuite,
     passing_test(PassingOk, 4, passing_test, ok),
-    % TODO: Complete unit test
     failing_test(Failing, 5, failing_test),
+    % TODO: Complete unit test
 
     [_|Remaining] = Groups,
 
@@ -100,18 +100,18 @@ passing_test(Line, Number, Test, Return) ->
     TestName = atom_to_binary(Test, utf8),
     NumberBin = integer_to_binary(Number),
     ReturnBin = list_to_binary(io_lib:format("~w", [Return])),
-    Expected = <<"ok ", NumberBin/binary, " ", TestName/binary, ". Return value: ", ReturnBin/binary>>,
+    Expected = <<"ok ", NumberBin/binary, " ", TestName/binary, " return value: ", ReturnBin/binary>>,
     Expected = Line.
 
 failing_test(Line, Number, Test) ->
     failing_test(Line, Number, Test, undefined).
 failing_test(Line, Number, Test, Reason) ->
-    TestName = atom_to_binary(Test, utf8),
+    TestName = atom_to_binary(Test, latin1),
     NumberBin = integer_to_binary(Number),
-    Expected = <<"not ok ", NumberBin/binary, " ", TestName/binary, ". Reason: ">>,
+    Expected = <<"not ok ", NumberBin/binary, " ", TestName/binary, " reason: ">>,
     case Reason of
         undefined ->
-            <<Expected, _/binary>> = Line;
+            {0, _} = binary:match(Line, Expected, []);
         _ ->
             <<Expected, Reason>> = Line
     end.

@@ -85,11 +85,13 @@ validate_output(Config) ->
     passing_test(PassingOk, 4, passing_test, ok),
     failing_test(Failing, 5, failing_test),
     passing_test(PassingDescription, 6, test_description, ok),
-    %failing_test(Todo, 7, todo_test),
+    todo_test(Todo, 7, todo_test),
+    skipped_test(Skip, 8, skip_test, <<"I'm lazy">>),
+    passing_test(Diagnostic, 9, diagnostic_test, ok),
 
+    [PassingGroupHeader, PassingGroupTest, PassingGroupFooter|Remaining] = Groups,
     % TODO: Complete unit test
 
-    [_|Remaining] = Groups,
 
     % Header and footer include the suite name
     <<"# Starting cttap_usage_SUITE">> = UsageSuiteHeader,
@@ -111,10 +113,31 @@ failing_test(Line, Number, Test) ->
 failing_test(Line, Number, Test, Reason) ->
     TestName = atom_to_binary(Test, latin1),
     NumberBin = integer_to_binary(Number),
-    Expected = <<"not ok ", NumberBin/binary, " ", TestName/binary, " reason: ">>,
+    Expected = <<"not ok ", NumberBin/binary, " ", TestName/binary, " reason:">>,
     case Reason of
         undefined ->
             {0, _} = binary:match(Line, Expected, []);
         _ ->
-            <<Expected, Reason>> = Line
+            <<Expected, " ", Reason>> = Line
     end.
+
+skipped_test(Line, Number, Test) ->
+    skipped_test(Line, Number, Test, undefined).
+skipped_test(Line, Number, Test, Reason) ->
+    TestName = atom_to_binary(Test, latin1),
+    NumberBin = integer_to_binary(Number),
+    Expected = <<"ok ", NumberBin/binary, " ", TestName/binary, " # SKIP">>,
+    case Reason of
+        undefined ->
+            {0, _} = binary:match(Line, Expected, []);
+        _ ->
+            RealExpected = <<Expected/binary, " ", Reason/binary>>,
+            ct:pal("RealExpected: ~w", [RealExpected]),
+            RealExpected = Line
+    end.
+
+todo_test(Line, Number, Test) ->
+    TestName = atom_to_binary(Test, latin1),
+    NumberBin = integer_to_binary(Number),
+    Expected = <<"not ok ", NumberBin/binary, " ", TestName/binary, " # TODO">>,
+    Expected = Line.

@@ -170,7 +170,7 @@ process_testcases([{testcase, Name, Return, _Num}|TestCases], Count, Output) ->
     % TODO: Figure out how to access the IO log here and log IO as diagnostic output
     Line = case Return of
         {skip, todo} ->
-            test_todo(Count, Name, "");
+            test_todo(Count, Name, undefined);
         {skip, Reason} ->
             test_skip(Count, Name, Reason);
         {error, Reason} ->
@@ -211,7 +211,12 @@ test_skip(Number, Description, Reason) ->
     io_lib:format("ok ~B ~s # SKIP ~s", [Number, Description, Reason]).
 
 test_todo(Number, Description, Reason) ->
-    io_lib:format("not ok ~B ~s # TODO ~s", [Number, Description, Reason]).
+    case Reason of
+        undefined ->
+            io_lib:format("not ok ~B ~s # TODO", [Number, Description]);
+        _ ->
+            io_lib:format("not ok ~B ~s # TODO ~s", [Number, Description, Reason])
+    end.
 
 diagnostic_line(Message) ->
     ["# "|Message].

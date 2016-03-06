@@ -56,7 +56,6 @@ id(Opts) ->
 %% @end
 %%--------------------------------------------------------------------
 init(Id, _Opts) ->
-    ct:pal("Id: ~w", [Id]),
     {ok,TapFile} = file:open(Id,[write]),
     {ok, #state{file_handle = TapFile, total = 0, data = []}}.
 
@@ -70,8 +69,9 @@ pre_init_per_suite(_Suite,Config,State) ->
     {Config, State#state{ suite_total = 0, tcs = [] }}.
 
 %% @doc Called after init_per_suite.
-post_init_per_suite(_Suite,_Config,Return,State) ->
-    {Return, State}.
+post_init_per_suite(Suite,_Config,Return,State) ->
+    Data = {suites, Suite, skipped, 0, []},
+    {Return, State#state{ data = [Data|State#state.data]}}.
 
 %% @doc Called before end_per_suite. 
 pre_end_per_suite(_Suite,Config,State) ->
@@ -79,8 +79,9 @@ pre_end_per_suite(_Suite,Config,State) ->
 
 %% @doc Called after end_per_suite. 
 post_end_per_suite(Suite,_Config,Return,State) ->
-    Data = {suites, Suite, State#state.suite_total, lists:reverse(State#state.tcs)},
-    {Return, State#state{ data = [Data | State#state.data] ,
+    [_|NewData] = State#state.data,
+    Data = {suites, Suite, ran, State#state.suite_total, lists:reverse(State#state.tcs)},
+    {Return, State#state{ data = [Data | NewData] ,
                           total = State#state.total + State#state.suite_total } }.
 
 %% @doc Called before each init_per_group.
@@ -153,9 +154,14 @@ tapify(Data, Total) ->
 
 process_suites([], Count, Output) ->
     {Output, Count};
-process_suites([{suites, Suite, _Num, TestCases}|Suites], Count, Output) ->
+process_suites([{suites, Suite, Status, _Num, TestCases}|Suites], Count, Output) ->
     Header = diagnostic_line(["Starting ", atom_to_list(Suite)]),
-    Footer = diagnostic_line(["Completed ", atom_to_list(Suite)]),
+    Footer = case Status of
+                 skipped ->
+                     diagnostic_line(["Skipped ", atom_to_list(Suite)]);
+                 ran ->
+                     diagnostic_line(["Completed ", atom_to_list(Suite)])
+             end,
     {TestcaseOutput, NewCount} = process_testcases(TestCases, Count, [Header|Output]),
     process_suites(Suites, NewCount, [Footer|TestcaseOutput]).
 

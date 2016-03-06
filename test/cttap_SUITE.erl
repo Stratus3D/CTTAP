@@ -69,7 +69,7 @@ validate_output(Config) ->
     <<"1..16">> = TestPlan,
 
     % Next comes the passing suite
-    [SuiteHeader, Passing1, Passing2, Passing3, SuiteFooter|UsageSuite] = Tests,
+    [SuiteHeader, Passing1, Passing2, Passing3, SuiteFooter|SkippedSuite] = Tests,
 
     % Header and footer should include the suite name
     <<"# Starting cttap_usage_passing_SUITE">> = SuiteHeader,
@@ -79,6 +79,11 @@ validate_output(Config) ->
     passing_test(Passing1, 1, passing_test_1, ok),
     passing_test(Passing2, 2, passing_test_2, ok),
     passing_test(Passing3, 3, passing_test_3, ok),
+
+    % Next is the skipped test suite
+    [SkippedSuiteHeader, SkippedSuiteFooter|UsageSuite] = SkippedSuite,
+    <<"# Starting cttap_usage_bail_out_SUITE">> = SkippedSuiteHeader,
+    <<"# Skipped cttap_usage_bail_out_SUITE">> = SkippedSuiteFooter,
 
     % Then the usage suite
     [UsageSuiteHeader, PassingOk, Failing, PassingDescription, Todo, Skip, Diagnostic|Groups] = UsageSuite,

@@ -1,6 +1,6 @@
 {application, cttap, [
 	{description, "A TAP producer that integrates with existing Common Test suites via a Common Test hook."},
-	{vsn, "0.1.0"},
+	{vsn, "1.0.0"},
 	{id, "git"},
 	{modules, []},
 	{registered, []},

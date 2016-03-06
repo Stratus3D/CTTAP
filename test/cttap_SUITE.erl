@@ -89,15 +89,41 @@ validate_output(Config) ->
     skipped_test(Skip, 8, skip_test, <<"I'm lazy">>),
     passing_test(Diagnostic, 9, diagnostic_test, ok),
 
-    [PassingGroupHeader, PassingGroupTest, PassingGroupFooter|Remaining] = Groups,
-    % TODO: Complete unit test
+    % First group
+    [PassingGroupHeader, PassingGroupTest, PassingGroupFooter|FailingGroup] = Groups,
+    <<"# Starting passing group">> = PassingGroupHeader,
+    passing_test(PassingGroupTest, 10, passing_test_in_group, ok),
+    <<"# Completed passing group. return value: ok">> = PassingGroupFooter,
 
+    % Failing group
+    [FailingGroupHeader, FailingGroupTest, FailingGroupFooter|DescriptionGroup] = FailingGroup,
+    <<"# Starting failing group">> = FailingGroupHeader,
+    failing_test(FailingGroupTest, 11, failing_test_in_group, <<"{{badmatch,2},[{cttap_usage_SUITE,failing_test_in_group,1">>),
+    <<"# Completed failing group. return value: ok">> = FailingGroupFooter,
+
+    % Description group
+    [DescriptionGroupHeader, DescriptionGroupTest, DescriptionGroupFooter|TodoGroup] = DescriptionGroup,
+    <<"# Starting description group">> = DescriptionGroupHeader,
+    passing_test(DescriptionGroupTest, 12, test_description_in_group, ok),
+    <<"# Completed description group. return value: ok">> = DescriptionGroupFooter,
+
+    % Todo group
+    [TodoGroupHeader, TodoGroupTest, TodoGroupFooter|OrderGroup] = TodoGroup,
+    <<"# Starting todo group">> = TodoGroupHeader,
+    todo_test(TodoGroupTest, 13, todo_test_in_group),
+    <<"# Completed todo group. return value: ok">> = TodoGroupFooter,
+
+    % Order group
+    [OrderGroupHeader, OrderGroupTest1, OrderGroupTest2, OrderGroupTest3, OrderGroupFooter, UsageSuiteFooter, _] = OrderGroup,
+    <<"# Starting order group">> = OrderGroupHeader,
+    passing_test(OrderGroupTest1, 14, group_order_1, ok),
+    failing_test(OrderGroupTest2, 15, group_order_2, <<"{{badmatch,2},[{cttap_usage_SUITE,group_order_2,1,[{">>),
+    passing_test(OrderGroupTest3, 16, group_order_3, ok),
+    <<"# Completed order group. return value: ok">> = OrderGroupFooter,
 
     % Header and footer include the suite name
     <<"# Starting cttap_usage_SUITE">> = UsageSuiteHeader,
-    %<<"# Completed cttap_usage_SUITE">> = UsageSuiteFooter,
-
-    ct:pal("Tests: ~w", [length(Tests)]),
+    <<"# Completed cttap_usage_SUITE">> = UsageSuiteFooter,
     ok.
 
 % Private functions
@@ -117,8 +143,9 @@ failing_test(Line, Number, Test, Reason) ->
     case Reason of
         undefined ->
             {0, _} = binary:match(Line, Expected, []);
-        _ ->
-            <<Expected, " ", Reason>> = Line
+        _ when is_binary(Reason) ->
+            ExpectedWithReason = <<Expected/binary, " ", Reason/binary>>,
+            {0, _} = binary:match(Line, ExpectedWithReason, [])
     end.
 
 skipped_test(Line, Number, Test) ->
@@ -132,7 +159,6 @@ skipped_test(Line, Number, Test, Reason) ->
             {0, _} = binary:match(Line, Expected, []);
         _ ->
             RealExpected = <<Expected/binary, " ", Reason/binary>>,
-            ct:pal("RealExpected: ~w", [RealExpected]),
             RealExpected = Line
     end.
 

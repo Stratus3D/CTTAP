@@ -68,47 +68,92 @@ init(Id, _Opts) ->
 pre_init_per_suite(_Suite,Config,State) ->
     {Config, State#state{ suite_total = 0, tcs = [] }}.
 
-%% @doc Called after init_per_suite.
+%%--------------------------------------------------------------------
+%% @doc
+%% Called after init_per_suite.
+%%
+%% @end
+%%--------------------------------------------------------------------
 post_init_per_suite(Suite,_Config,Return,State) ->
     Data = {suites, Suite, skipped, 0, []},
     {Return, State#state{ data = [Data|State#state.data]}}.
 
-%% @doc Called before end_per_suite. 
+%%--------------------------------------------------------------------
+%% @doc
+%% Called before end_per_suite.
+%%
+%% @end
+%%--------------------------------------------------------------------
 pre_end_per_suite(_Suite,Config,State) ->
     {Config, State}.
 
-%% @doc Called after end_per_suite. 
+%%--------------------------------------------------------------------
+%% @doc
+%% Called after end_per_suite.
+%%
+%% @end
+%%--------------------------------------------------------------------
 post_end_per_suite(Suite,_Config,Return,State) ->
     [_|NewData] = State#state.data,
     Data = {suites, Suite, ran, State#state.suite_total, lists:reverse(State#state.tcs)},
     {Return, State#state{ data = [Data | NewData] ,
                           total = State#state.total + State#state.suite_total } }.
 
-%% @doc Called before each init_per_group.
+%%--------------------------------------------------------------------
+%% @doc
+%% Called before each init_per_group.
+%%
+%% @end
+%%--------------------------------------------------------------------
 pre_init_per_group(_Group,Config,State) ->
     {Config, State}.
 
-%% @doc Called after each init_per_group.
+%%--------------------------------------------------------------------
+%% @doc
+%% Called after each init_per_group.
+%%
+%% @end
+%%--------------------------------------------------------------------
 post_init_per_group(Group,_Config,Return,State) ->
     Data = {group, Group, Return, [], incomplete},
     {Return, State#state{tg=Data, tgtcs=[]}}.
 
-%% @doc Called after each end_per_group. 
+%%--------------------------------------------------------------------
+%% @doc
+%% Called after each end_per_group.
+%%
+%% @end
+%%--------------------------------------------------------------------
 pre_end_per_group(_Group,Config,State) ->
     {Config, State}.
 
-%% @doc Called after each end_per_group. 
+%%--------------------------------------------------------------------
+%% @doc
+%% Called after each end_per_group.
+%%
+%% @end
+%%--------------------------------------------------------------------
 post_end_per_group(_Group,_Config,Return,State) ->
     {group, GroupName, _, _, _}=State#state.tg,
     OtherTests=State#state.tcs,
     NewGroupData={group, GroupName, Return, lists:reverse(State#state.tgtcs)},
     {Return, State#state{tg=undefined, tcs=[NewGroupData|OtherTests], tgtcs=undefined}}.
 
-%% @doc Called before each test case.
+%%--------------------------------------------------------------------
+%% @doc
+%% Called before each test case.
+%%
+%% @end
+%%--------------------------------------------------------------------
 pre_init_per_testcase(_TC,Config,State) ->
     {Config, State#state{ ts = timestamp(), suite_total = State#state.suite_total + 1 } }.
 
-%% @doc Called after each test case.
+%%--------------------------------------------------------------------
+%% @doc
+%% Called after each test case.
+%%
+%% @end
+%%--------------------------------------------------------------------
 post_end_per_testcase(TC,_Config,Return,State) ->
     TCInfo = {testcase, TC, Return, timer:now_diff(timestamp(), State#state.ts)},
     NewState = case State#state.tg of
@@ -120,13 +165,23 @@ post_end_per_testcase(TC,_Config,Return,State) ->
 
     {Return, NewState}.
 
-%% @doc Called after post_init_per_suite, post_end_per_suite, post_init_per_group,
+%%--------------------------------------------------------------------
+%% @doc
+%% Called after post_init_per_suite, post_end_per_suite, post_init_per_group,
 %% post_end_per_group and post_end_per_testcase if the suite, group or test case failed.
+%%
+%% @end
+%%--------------------------------------------------------------------
 on_tc_fail(_TC, _Reason, State) ->
     State.
 
-%% @doc Called when a test case is skipped by either user action
-%% or due to an init function failing.  
+%%--------------------------------------------------------------------
+%% @doc
+%% Called when a test case is skipped by either user action
+%% or due to an init function failing.
+%%
+%% @end
+%%--------------------------------------------------------------------
 on_tc_skip(_TC, _Reason, State) ->
     State.
 
